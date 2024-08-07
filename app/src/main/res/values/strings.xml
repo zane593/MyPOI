@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">MyPOI</string>
+    <string-array name="colors_array">
+        <item>Rosso</item>
+        <item>Verde</item>
+        <item>Blu</item>
+    </string-array>
 </resources>

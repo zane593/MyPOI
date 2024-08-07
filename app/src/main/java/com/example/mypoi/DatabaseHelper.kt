@@ -6,58 +6,133 @@ import com.google.android.gms.maps.model.LatLng
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
-    //definiamo le proprietà della tabella del database
     companion object {
         private const val DATABASE_NAME = "LocationsDB"
-        private const val DATABASE_VERSION = 1
-        private const val TABLE_NAME = "locations"
+        private const val DATABASE_VERSION = 3
+        private const val TABLE_LOCATIONS = "locations"
+        private const val TABLE_CATEGORIES = "categories"
         private const val COLUMN_ID = "id"
         private const val COLUMN_LATITUDE = "latitude"
         private const val COLUMN_LONGITUDE = "longitude"
+        private const val COLUMN_CATEGORY_ID = "category_id"
+        private const val COLUMN_CATEGORY_NAME = "category_name"
+        private const val COLUMN_COLOR = "color"
     }
 
-    //Database viene creato per la prima volta, quindi si va a creare tutta la tabella e la si inizia a riempire
     override fun onCreate(db: SQLiteDatabase) {
-        val createTable = "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, $COLUMN_LATITUDE REAL, $COLUMN_LONGITUDE REAL)"
-        db.execSQL(createTable)
+        val createCategoriesTable = """
+            CREATE TABLE $TABLE_CATEGORIES (
+                $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_CATEGORY_NAME TEXT UNIQUE,
+                $COLUMN_COLOR INTEGER
+            )
+        """.trimIndent()
+        db.execSQL(createCategoriesTable)
+
+        val createLocationsTable = """
+            CREATE TABLE $TABLE_LOCATIONS (
+                $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_LATITUDE REAL,
+                $COLUMN_LONGITUDE REAL,
+                $COLUMN_CATEGORY_ID INTEGER,
+                FOREIGN KEY($COLUMN_CATEGORY_ID) REFERENCES $TABLE_CATEGORIES($COLUMN_ID)
+            )
+        """.trimIndent()
+        db.execSQL(createLocationsTable)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_LOCATIONS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_CATEGORIES")
         onCreate(db)
     }
 
-    //viene passato la latitudine e longitudine da poi mettere all'interno del database e salvare
-    fun addLocation(latLng: LatLng) {
+    fun addLocation(latLng: LatLng, categoryId: Long) {
         val db = this.writableDatabase
-        //mappa di coppie chiave valore
         val values = ContentValues().apply {
             put(COLUMN_LATITUDE, latLng.latitude)
             put(COLUMN_LONGITUDE, latLng.longitude)
+            put(COLUMN_CATEGORY_ID, categoryId)
         }
-        //inserimento in tabella
-        db.insert(TABLE_NAME, null, values)
+        db.insert(TABLE_LOCATIONS, null, values)
         db.close()
     }
 
-    //dovrà tornare un lista di lat e lon per poi ciclare creando i marker da vedere quando si apre la mappa
-    fun getAllLocations(): List<LatLng> {
-        val locations = mutableListOf<LatLng>()
-        //operazioni di solo lettura
+    fun addCategory(categoryName: String, color: Int): Long {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_CATEGORY_NAME, categoryName)
+            put(COLUMN_COLOR, color)
+        }
+        val id = db.insertWithOnConflict(TABLE_CATEGORIES, null, values, SQLiteDatabase.CONFLICT_IGNORE)
+        db.close()
+        return id
+    }
+
+    fun getAllLocations(): List<LocationData> {
+        val locations = mutableListOf<LocationData>()
         val db = this.readableDatabase
-        //vogliamo prendere la tabella
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)
+        val query = """
+            SELECT l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR
+            FROM $TABLE_LOCATIONS l
+            JOIN $TABLE_CATEGORIES c ON l.$COLUMN_CATEGORY_ID = c.$COLUMN_ID
+        """.trimIndent()
+        val cursor = db.rawQuery(query, null)
 
         cursor.use {
-            //scorre la tabella
             while (it.moveToNext()) {
-                //prende i valori dalla colonna di altitudine e longitudine
                 val lat = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LATITUDE))
                 val lng = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LONGITUDE))
-                locations.add(LatLng(lat, lng))
+                val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
+                val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
+                locations.add(LocationData(LatLng(lat, lng), category, color))
             }
         }
-        //ritorna la lista di lat e lon
         return locations
     }
+
+    fun getAllCategories(): List<CategoryData> {
+        val categories = mutableListOf<CategoryData>()
+        val db = this.readableDatabase
+        val cursor = db.query(TABLE_CATEGORIES, null, null, null, null, null, null)
+
+        cursor.use {
+            while (it.moveToNext()) {
+                val id = it.getLong(it.getColumnIndexOrThrow(COLUMN_ID))
+                val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
+                val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
+                categories.add(CategoryData(id, category, color))
+            }
+        }
+        return categories
+    }
+
+    fun getCategoryColor(categoryName: String): Int? {
+        val db = this.readableDatabase
+        val cursor = db.query(TABLE_CATEGORIES, arrayOf(COLUMN_COLOR), "$COLUMN_CATEGORY_NAME = ?", arrayOf(categoryName), null, null, null)
+
+        return cursor.use {
+            if (it.moveToFirst()) {
+                it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
+            } else {
+                null
+            }
+        }
+    }
+
+    fun getCategoryId(categoryName: String): Long? {
+        val db = this.readableDatabase
+        val cursor = db.query(TABLE_CATEGORIES, arrayOf(COLUMN_ID), "$COLUMN_CATEGORY_NAME = ?", arrayOf(categoryName), null, null, null)
+
+        return cursor.use {
+            if (it.moveToFirst()) {
+                it.getLong(it.getColumnIndexOrThrow(COLUMN_ID))
+            } else {
+                null
+            }
+        }
+    }
 }
+
+data class LocationData(val latLng: LatLng, val category: String, val color: Int)
+data class CategoryData(val id: Long, val name: String, val color: Int)
