@@ -73,20 +73,21 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val locations = mutableListOf<LocationData>()
         val db = this.readableDatabase
         val query = """
-        SELECT l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR
-        FROM $TABLE_LOCATIONS l
-        JOIN $TABLE_CATEGORIES c ON l.$COLUMN_CATEGORY_ID = c.$COLUMN_ID
-        WHERE c.$COLUMN_ID = ?
-    """.trimIndent()
+            SELECT l.$COLUMN_ID, l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR
+            FROM $TABLE_LOCATIONS l
+            JOIN $TABLE_CATEGORIES c ON l.$COLUMN_CATEGORY_ID = c.$COLUMN_ID
+            WHERE c.$COLUMN_ID = ?
+        """.trimIndent()
         val cursor = db.rawQuery(query, arrayOf(categoryId.toString()))
 
         cursor.use {
             while (it.moveToNext()) {
+                val id = it.getLong(it.getColumnIndexOrThrow(COLUMN_ID))
                 val lat = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LATITUDE))
                 val lng = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LONGITUDE))
                 val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
                 val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
-                locations.add(LocationData(LatLng(lat, lng), category, color))
+                locations.add(LocationData(id, LatLng(lat, lng), category, color))
             }
         }
         return locations
@@ -97,7 +98,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val locations = mutableListOf<LocationData>()
         val db = this.readableDatabase
         val query = """
-            SELECT l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR
+            SELECT l.$COLUMN_ID, l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR
             FROM $TABLE_LOCATIONS l
             JOIN $TABLE_CATEGORIES c ON l.$COLUMN_CATEGORY_ID = c.$COLUMN_ID
         """.trimIndent()
@@ -105,11 +106,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         cursor.use {
             while (it.moveToNext()) {
+                val id = it.getLong(it.getColumnIndexOrThrow(COLUMN_ID))
                 val lat = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LATITUDE))
                 val lng = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LONGITUDE))
                 val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
                 val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
-                locations.add(LocationData(LatLng(lat, lng), category, color))
+                locations.add(LocationData(id, LatLng(lat, lng), category, color))
             }
         }
         return locations
@@ -131,19 +133,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return categories
     }
 
-    fun getCategoryColor(categoryName: String): Int? {
-        val db = this.readableDatabase
-        val cursor = db.query(TABLE_CATEGORIES, arrayOf(COLUMN_COLOR), "$COLUMN_CATEGORY_NAME = ?", arrayOf(categoryName), null, null, null)
-
-        return cursor.use {
-            if (it.moveToFirst()) {
-                it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
-            } else {
-                null
-            }
-        }
-    }
-
     fun getCategoryId(categoryName: String): Long? {
         val db = this.readableDatabase
         val cursor = db.query(TABLE_CATEGORIES, arrayOf(COLUMN_ID), "$COLUMN_CATEGORY_NAME = ?", arrayOf(categoryName), null, null, null)
@@ -156,9 +145,25 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             }
         }
     }
+
+    fun updateLocation(id: Long, newLocation: LocationData) {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_LATITUDE, newLocation.latLng.latitude)
+            put(COLUMN_LONGITUDE, newLocation.latLng.longitude)
+        }
+        db.update(TABLE_LOCATIONS, values, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
+    fun deleteLocation(id: Long) {
+        val db = this.writableDatabase
+        db.delete(TABLE_LOCATIONS, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
 }
 
 
 
-data class LocationData(val latLng: LatLng, val category: String, val color: Int)
+data class LocationData(val id: Long, val latLng: LatLng, val category: String, val color: Int)
 data class CategoryData(val id: Long, val name: String, val color: Float)
