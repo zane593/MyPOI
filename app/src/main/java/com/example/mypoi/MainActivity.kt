@@ -2,6 +2,7 @@ package com.example.mypoi
 
 import DatabaseHelper
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -42,6 +43,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         findViewById<Button>(R.id.locationButton).setOnClickListener {
             getLastLocationAndSave()
+        }
+
+        findViewById<Button>(R.id.listButton).setOnClickListener {
+            val intent = Intent(this, CategoryListActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -141,20 +147,24 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             val categoryId: Long
+            val markerColor: Float
             if (category !in categoryNames) {
-                categoryId = dbHelper.addCategory(category, selectedColor.toInt())
+                // Nuova categoria
+                categoryId = dbHelper.addCategory(category, selectedColor)
+                markerColor = selectedColor
             } else {
+                // Categoria esistente
                 categoryId = dbHelper.getCategoryId(category) ?: return@setOnClickListener
+                markerColor = categories.find { it.name == category }?.color ?: BitmapDescriptorFactory.HUE_RED
             }
 
             dbHelper.addLocation(latLng, categoryId)
-            val color = dbHelper.getCategoryColor(category) ?: selectedColor.toInt()
 
             map.addMarker(MarkerOptions()
                 .position(latLng)
                 .title(category)
-                .icon(BitmapDescriptorFactory.defaultMarker(color.toFloat()))
-            )
+                .icon(BitmapDescriptorFactory.defaultMarker(markerColor)))
+
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
             Toast.makeText(this, "Posizione salvata", Toast.LENGTH_SHORT).show()
             dialog.dismiss()

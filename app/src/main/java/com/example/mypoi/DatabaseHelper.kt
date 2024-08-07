@@ -58,16 +58,40 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.close()
     }
 
-    fun addCategory(categoryName: String, color: Int): Long {
+    fun addCategory(categoryName: String, color: Float): Long {
         val db = this.writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_CATEGORY_NAME, categoryName)
             put(COLUMN_COLOR, color)
         }
-        val id = db.insertWithOnConflict(TABLE_CATEGORIES, null, values, SQLiteDatabase.CONFLICT_IGNORE)
+        val id = db.insertWithOnConflict(TABLE_CATEGORIES, null, values, SQLiteDatabase.CONFLICT_REPLACE)
         db.close()
         return id
     }
+
+    fun getLocationsByCategory(categoryId: Long): List<LocationData> {
+        val locations = mutableListOf<LocationData>()
+        val db = this.readableDatabase
+        val query = """
+        SELECT l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR
+        FROM $TABLE_LOCATIONS l
+        JOIN $TABLE_CATEGORIES c ON l.$COLUMN_CATEGORY_ID = c.$COLUMN_ID
+        WHERE c.$COLUMN_ID = ?
+    """.trimIndent()
+        val cursor = db.rawQuery(query, arrayOf(categoryId.toString()))
+
+        cursor.use {
+            while (it.moveToNext()) {
+                val lat = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LATITUDE))
+                val lng = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LONGITUDE))
+                val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
+                val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
+                locations.add(LocationData(LatLng(lat, lng), category, color))
+            }
+        }
+        return locations
+    }
+
 
     fun getAllLocations(): List<LocationData> {
         val locations = mutableListOf<LocationData>()
@@ -100,7 +124,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             while (it.moveToNext()) {
                 val id = it.getLong(it.getColumnIndexOrThrow(COLUMN_ID))
                 val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
-                val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
+                val color = it.getFloat(it.getColumnIndexOrThrow(COLUMN_COLOR))
                 categories.add(CategoryData(id, category, color))
             }
         }
@@ -134,5 +158,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 }
 
+
+
 data class LocationData(val latLng: LatLng, val category: String, val color: Int)
-data class CategoryData(val id: Long, val name: String, val color: Int)
+data class CategoryData(val id: Long, val name: String, val color: Float)
