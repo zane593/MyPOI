@@ -69,6 +69,21 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return id
     }
 
+
+    fun getCategoryColor(categoryName: String): Float? {
+        val db = this.readableDatabase
+        val cursor = db.query(TABLE_CATEGORIES, arrayOf(COLUMN_COLOR), "$COLUMN_CATEGORY_NAME = ?", arrayOf(categoryName), null, null, null)
+
+        return cursor.use {
+            if (it.moveToFirst()) {
+                it.getFloat(it.getColumnIndexOrThrow(COLUMN_COLOR))
+            } else {
+                null
+            }
+        }
+    }
+
+
     fun getLocationsByCategory(categoryId: Long): List<LocationData> {
         val locations = mutableListOf<LocationData>()
         val db = this.readableDatabase
@@ -87,7 +102,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val lng = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LONGITUDE))
                 val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
                 val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
-                locations.add(LocationData(id, LatLng(lat, lng), category, color))
+                locations.add(LocationData(id, LatLng(lat, lng), category, color.toFloat()))
             }
         }
         return locations
@@ -111,7 +126,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val lng = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LONGITUDE))
                 val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
                 val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
-                locations.add(LocationData(id, LatLng(lat, lng), category, color))
+                locations.add(LocationData(id, LatLng(lat, lng), category, color.toFloat()))
             }
         }
         return locations
@@ -133,7 +148,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return categories
     }
 
-    fun getCategoryId(categoryName: String): Long? {
+    fun getCategoryId(categoryName: String): Long {
         val db = this.readableDatabase
         val cursor = db.query(TABLE_CATEGORIES, arrayOf(COLUMN_ID), "$COLUMN_CATEGORY_NAME = ?", arrayOf(categoryName), null, null, null)
 
@@ -141,7 +156,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             if (it.moveToFirst()) {
                 it.getLong(it.getColumnIndexOrThrow(COLUMN_ID))
             } else {
-                null
+                -1
             }
         }
     }
@@ -165,5 +180,5 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
 
 
-data class LocationData(val id: Long, val latLng: LatLng, val category: String, val color: Int)
+data class LocationData(val id: Long, val latLng: LatLng, val category: String, val color: Float)
 data class CategoryData(val id: Long, val name: String, val color: Float)

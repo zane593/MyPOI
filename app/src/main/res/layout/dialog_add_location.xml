@@ -1,84 +1,196 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/editTextCategory"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/categoryInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nuova Categoria" />
+        android:hint="Categoria">
 
-    <Spinner
-        android:id="@+id/spinnerCategory"
+        <AutoCompleteTextView
+            android:id="@+id/categoryAutoCompleteTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/newCategoryInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Seleziona Categoria" />
+        android:hint="Nuova Categoria"
+        android:layout_marginTop="8dp">
 
-    <LinearLayout
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/newCategoryEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Seleziona un colore:"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"/>
+
+
+    <com.google.android.flexbox.FlexboxLayout
         android:id="@+id/colorContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
+        app:flexWrap="wrap"
+        app:justifyContent="flex_start">
 
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
+            android:layout_margin="4dp">
             <View
-                android:id="@+id/colorRed"
+                android:id="@+id/color1"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@android:color/holo_red_dark" />
-            <View
-                android:id="@+id/borderRed"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="center" />
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
         </FrameLayout>
-
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
+            android:layout_margin="4dp">
             <View
-                android:id="@+id/colorGreen"
+                android:id="@+id/color2"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@android:color/holo_green_dark" />
-            <View
-                android:id="@+id/borderGreen"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="center" />
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
         </FrameLayout>
-
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
+            android:layout_margin="4dp">
             <View
-                android:id="@+id/colorBlue"
+                android:id="@+id/color3"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@android:color/holo_blue_dark" />
-            <View
-                android:id="@+id/borderBlue"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="@android:color/transparent"
-                android:layout_gravity="center" />
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
         </FrameLayout>
-    </LinearLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
+            <View
+                android:id="@+id/color4"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
+            <View
+                android:id="@+id/color5"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
+            <View
+                android:id="@+id/color6"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
+            <View
+                android:id="@+id/color7"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
+            <View
+                android:id="@+id/color8"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
+            <View
+                android:id="@+id/color9"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
+            <View
+                android:id="@+id/color10"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
+            <View
+                android:id="@+id/color11"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
+            <View
+                android:id="@+id/color12"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_background"
+                android:foreground="@drawable/color_circle_selector" />
+        </FrameLayout>
 
-    <Button
+    </com.google.android.flexbox.FlexboxLayout>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonSave"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Salva" />
+        android:text="Salva"
+        android:layout_marginTop="16dp"/>
+
 </LinearLayout>

@@ -45,6 +45,8 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
     implementation (libs.material.v140)
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("com.google.android.material:material:1.5.0")
     implementation("com.google.android.material:material:1.12.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
