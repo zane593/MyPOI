@@ -1,12 +1,9 @@
 package com.example.mypoi
 
-import CategoryData
 import DatabaseHelper
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import android.widget.ListView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 class CategoryListActivity : AppCompatActivity() {
@@ -20,9 +17,9 @@ class CategoryListActivity : AppCompatActivity() {
         dbHelper = DatabaseHelper(this)
 
         val categoryListView = findViewById<ListView>(R.id.categoryListView)
-        val categories = dbHelper.getAllCategories()
+        val categories = dbHelper.getAllCategories().toMutableList()
 
-        val adapter = CategoryAdapter(this, categories)
+        val adapter = CategoryAdapter(this, categories, dbHelper)
         categoryListView.adapter = adapter
 
         categoryListView.setOnItemClickListener { _, _, position, _ ->

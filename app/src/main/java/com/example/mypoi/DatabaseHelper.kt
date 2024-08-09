@@ -35,9 +35,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 $COLUMN_LATITUDE REAL,
                 $COLUMN_LONGITUDE REAL,
                 $COLUMN_CATEGORY_ID INTEGER,
+                point_name TEXT,
                 FOREIGN KEY($COLUMN_CATEGORY_ID) REFERENCES $TABLE_CATEGORIES($COLUMN_ID)
             )
-        """.trimIndent()
+""".trimIndent()
         db.execSQL(createLocationsTable)
     }
 
@@ -47,12 +48,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         onCreate(db)
     }
 
-    fun addLocation(latLng: LatLng, categoryId: Long) {
+    fun addLocation(latLng: LatLng, categoryId: Long, pointName: String) {
         val db = this.writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_LATITUDE, latLng.latitude)
             put(COLUMN_LONGITUDE, latLng.longitude)
             put(COLUMN_CATEGORY_ID, categoryId)
+            put("point_name", pointName)
         }
         db.insert(TABLE_LOCATIONS, null, values)
         db.close()
@@ -174,6 +176,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun deleteLocation(id: Long) {
         val db = this.writableDatabase
         db.delete(TABLE_LOCATIONS, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
+    fun updateCategory(categoryId: Long, newName: String, newColor: Float) {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_CATEGORY_NAME, newName)
+            put(COLUMN_COLOR, newColor)
+        }
+        db.update(TABLE_CATEGORIES, values, "$COLUMN_ID = ?", arrayOf(categoryId.toString()))
         db.close()
     }
 }

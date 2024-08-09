@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -51,6 +52,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             val intent = Intent(this, CategoryListActivity::class.java)
             startActivity(intent)
         }
+
+        findViewById<Button>(R.id.refreshButton).setOnClickListener {
+            loadSavedLocations()
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -59,6 +64,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun loadSavedLocations() {
+        map.clear()
         val locations = dbHelper.getAllLocations()
         for (location in locations) {
             val markerOptions = MarkerOptions()
@@ -93,6 +99,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_location, null)
         val categoryAutoCompleteTextView = dialogView.findViewById<AutoCompleteTextView>(R.id.categoryAutoCompleteTextView)
         val newCategoryEditText = dialogView.findViewById<EditText>(R.id.newCategoryEditText)
+        val pointNameEditText = dialogView.findViewById<TextInputEditText>(R.id.pointNameEditText)
         val buttonSave = dialogView.findViewById<Button>(R.id.buttonSave)
         val colorContainer = dialogView.findViewById<View>(R.id.colorContainer)
 
@@ -159,10 +166,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         buttonSave.setOnClickListener {
             val selectedCategory = categoryAutoCompleteTextView.text.toString()
             val newCategory = newCategoryEditText.text.toString()
+            val pointName = pointNameEditText.text.toString()
             val category = when {
                 selectedCategory != "Crea Una Categoria" -> selectedCategory
                 newCategory.isNotEmpty() -> newCategory
                 else -> "Senza Categoria"
+            }
+
+            if (pointName.isEmpty()) {
+                Toast.makeText(this, "Inserisci un nome per il punto", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
 
             try {
@@ -184,11 +197,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
 
-                dbHelper.addLocation(latLng, categoryId)
+                dbHelper.addLocation(latLng, categoryId, pointName)
 
                 map.addMarker(MarkerOptions()
                     .position(latLng)
-                    .title(category)
+                    .title(pointName)
                     .icon(BitmapDescriptorFactory.defaultMarker(markerColor)))
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
                 Toast.makeText(this, "Posizione salvata", Toast.LENGTH_SHORT).show()
@@ -198,9 +211,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-
         dialog.show()
     }
+
 
     fun String.toFloatColor(): Float {
         val color = Color.parseColor(this)
