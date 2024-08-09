@@ -90,11 +90,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val locations = mutableListOf<LocationData>()
         val db = this.readableDatabase
         val query = """
-            SELECT l.$COLUMN_ID, l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR
-            FROM $TABLE_LOCATIONS l
-            JOIN $TABLE_CATEGORIES c ON l.$COLUMN_CATEGORY_ID = c.$COLUMN_ID
-            WHERE c.$COLUMN_ID = ?
-        """.trimIndent()
+        SELECT l.$COLUMN_ID, l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR, l.point_name
+        FROM $TABLE_LOCATIONS l
+        JOIN $TABLE_CATEGORIES c ON l.$COLUMN_CATEGORY_ID = c.$COLUMN_ID
+        WHERE c.$COLUMN_ID = ?
+    """.trimIndent()
         val cursor = db.rawQuery(query, arrayOf(categoryId.toString()))
 
         cursor.use {
@@ -104,7 +104,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val lng = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LONGITUDE))
                 val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
                 val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
-                locations.add(LocationData(id, LatLng(lat, lng), category, color.toFloat()))
+                val name = it.getString(it.getColumnIndexOrThrow("point_name"))
+                locations.add(LocationData(id, LatLng(lat, lng), category, color.toFloat(), name))
             }
         }
         return locations
@@ -115,10 +116,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val locations = mutableListOf<LocationData>()
         val db = this.readableDatabase
         val query = """
-            SELECT l.$COLUMN_ID, l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR
-            FROM $TABLE_LOCATIONS l
-            JOIN $TABLE_CATEGORIES c ON l.$COLUMN_CATEGORY_ID = c.$COLUMN_ID
-        """.trimIndent()
+        SELECT l.$COLUMN_ID, l.$COLUMN_LATITUDE, l.$COLUMN_LONGITUDE, c.$COLUMN_CATEGORY_NAME, c.$COLUMN_COLOR, l.point_name
+        FROM $TABLE_LOCATIONS l
+        JOIN $TABLE_CATEGORIES c ON l.$COLUMN_CATEGORY_ID = c.$COLUMN_ID
+    """.trimIndent()
         val cursor = db.rawQuery(query, null)
 
         cursor.use {
@@ -128,7 +129,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val lng = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LONGITUDE))
                 val category = it.getString(it.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME))
                 val color = it.getInt(it.getColumnIndexOrThrow(COLUMN_COLOR))
-                locations.add(LocationData(id, LatLng(lat, lng), category, color.toFloat()))
+                val name = it.getString(it.getColumnIndexOrThrow("point_name"))
+                locations.add(LocationData(id, LatLng(lat, lng), category, color.toFloat(), name))
             }
         }
         return locations
@@ -168,6 +170,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val values = ContentValues().apply {
             put(COLUMN_LATITUDE, newLocation.latLng.latitude)
             put(COLUMN_LONGITUDE, newLocation.latLng.longitude)
+            put("point_name", newLocation.name)
         }
         db.update(TABLE_LOCATIONS, values, "$COLUMN_ID = ?", arrayOf(id.toString()))
         db.close()
@@ -192,5 +195,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
 
 
-data class LocationData(val id: Long, val latLng: LatLng, val category: String, val color: Float)
+data class LocationData(
+    val id: Long,
+    val latLng: LatLng,
+    val category: String,
+    val color: Float,
+    val name: String
+)
 data class CategoryData(val id: Long, val name: String, val color: Float)

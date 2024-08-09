@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var dbHelper: DatabaseHelper
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
+    private var isMapInitialized = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,15 +53,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             val intent = Intent(this, CategoryListActivity::class.java)
             startActivity(intent)
         }
-
-        findViewById<Button>(R.id.refreshButton).setOnClickListener {
-            loadSavedLocations()
-        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         loadSavedLocations()
+        isMapInitialized = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isMapInitialized) {
+            loadSavedLocations()
+        }
     }
 
     private fun loadSavedLocations() {

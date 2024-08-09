@@ -7,12 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.gms.maps.model.LatLng
 
 class MarkerListActivity : AppCompatActivity() {
@@ -39,8 +39,12 @@ class MarkerListActivity : AppCompatActivity() {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = convertView ?: layoutInflater.inflate(R.layout.marker_list_item, parent, false)
                 val marker = getItem(position)
-                view.findViewById<TextView>(R.id.tvLatitude).text = "Lat: ${marker?.latLng?.latitude}"
-                view.findViewById<TextView>(R.id.tvLongitude).text = "Lng: ${marker?.latLng?.longitude}"
+                view.findViewById<TextView>(R.id.tvPointName).text = marker?.name
+                view.findViewById<Button>(R.id.btnDelete).setOnClickListener {
+                    dbHelper.deleteLocation(marker!!.id)
+                    markers.remove(marker)
+                    notifyDataSetChanged()
+                }
                 return view
             }
         }
@@ -53,11 +57,13 @@ class MarkerListActivity : AppCompatActivity() {
 
     private fun showEditDialog(location: LocationData) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_marker, null)
-        val etLatitude = dialogView.findViewById<EditText>(R.id.etLatitude)
-        val etLongitude = dialogView.findViewById<EditText>(R.id.etLongitude)
+        val etPointName = dialogView.findViewById<TextInputEditText>(R.id.etPointName)
+        val etLatitude = dialogView.findViewById<TextInputEditText>(R.id.etLatitude)
+        val etLongitude = dialogView.findViewById<TextInputEditText>(R.id.etLongitude)
         val btnModify = dialogView.findViewById<Button>(R.id.btnModify)
         val btnDelete = dialogView.findViewById<Button>(R.id.btnDelete)
 
+        etPointName.setText(location.name)
         etLatitude.setText(location.latLng.latitude.toString())
         etLongitude.setText(location.latLng.longitude.toString())
 
@@ -66,10 +72,11 @@ class MarkerListActivity : AppCompatActivity() {
             .create()
 
         btnModify.setOnClickListener {
+            val newName = etPointName.text.toString()
             val newLat = etLatitude.text.toString().toDoubleOrNull()
             val newLng = etLongitude.text.toString().toDoubleOrNull()
             if (newLat != null && newLng != null) {
-                val newLocation = LocationData(location.id, LatLng(newLat, newLng), location.category, location.color)
+                val newLocation = LocationData(location.id, LatLng(newLat, newLng), location.category, location.color, newName)
                 dbHelper.updateLocation(location.id, newLocation)
                 val index = markers.indexOf(location)
                 markers[index] = newLocation
