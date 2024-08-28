@@ -7,10 +7,11 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -45,14 +46,33 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        findViewById<View>(R.id.locationButton).setOnClickListener {
+        val locationButton = findViewById<Button>(R.id.locationButton)
+
+        locationButton.setBackgroundResource(R.drawable.circle_background)
+        locationButton.layoutParams.width = 200
+        locationButton.layoutParams.height = 200
+        locationButton.setPadding(50, 50, 50, 50)
+
+        locationButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.map_marker_plus)
+        locationButton.setOnClickListener {
             getLastLocationAndSave()
         }
 
-        findViewById<View>(R.id.listButton).setOnClickListener {
+        val listButton = findViewById<Button>(R.id.listButton)
+        listButton.layoutParams.width = 200
+        listButton.layoutParams.height = 200
+        listButton.setPadding(50, 50, 50, 50)
+
+        listButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.list)
+
+
+
+        listButton.setOnClickListener {
             val intent = Intent(this, CategoryListActivity::class.java)
             startActivity(intent)
         }
+
+        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {

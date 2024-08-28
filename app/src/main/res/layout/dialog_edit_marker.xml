@@ -48,6 +48,7 @@
             android:id="@+id/btnModify"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/medium_blue"
             android:layout_weight="1"
             android:text="Modifica" />
 
@@ -55,6 +56,7 @@
             android:id="@+id/btnDelete"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/medium_blue"
             android:layout_weight="1"
             android:text="Elimina" />
     </LinearLayout>

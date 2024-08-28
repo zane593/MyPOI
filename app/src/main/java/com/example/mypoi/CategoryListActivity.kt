@@ -3,6 +3,7 @@ package com.example.mypoi
 import DatabaseHelper
 import android.content.Intent
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -29,5 +30,6 @@ class CategoryListActivity : AppCompatActivity() {
             intent.putExtra("CATEGORY_NAME", selectedCategory.name)
             startActivity(intent)
         }
+        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 }

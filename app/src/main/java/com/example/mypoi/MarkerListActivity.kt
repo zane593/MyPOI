@@ -5,6 +5,7 @@ import LocationData
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
@@ -53,6 +54,8 @@ class MarkerListActivity : AppCompatActivity() {
         markerListView.setOnItemClickListener { _, _, position, _ ->
             showEditDialog(markers[position])
         }
+
+        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
     private fun showEditDialog(location: LocationData) {
