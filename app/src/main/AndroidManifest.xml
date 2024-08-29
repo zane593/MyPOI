@@ -30,6 +30,7 @@
         </activity>
         <activity android:name=".CategoryListActivity" />
         <activity android:name=".MarkerListActivity" />
+        <activity android:name=".NearbyPointsActivity" />
     </application>
 
 </manifest>

@@ -5,4 +5,8 @@
         <item>Verde</item>
         <item>Blu</item>
     </string-array>
+
+    <string name="perplexity_api_key">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</string>
+    <string name="google_api_key">AIzaSyC3Rhx9jJN5VAjLi2tKe94X8BEptpCN89w</string>
+    <string name="google_cse_id">1369b9f946793477c</string>
 </resources>

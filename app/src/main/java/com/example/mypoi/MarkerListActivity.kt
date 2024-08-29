@@ -78,7 +78,7 @@ class MarkerListActivity : AppCompatActivity() {
             val newName = etPointName.text.toString()
             val newLat = etLatitude.text.toString().toDoubleOrNull()
             val newLng = etLongitude.text.toString().toDoubleOrNull()
-            if (newLat != null && newLng != null) {
+            if (newLat != null && newLng != null && isValidLatLng(newLat, newLng)) {
                 val newLocation = LocationData(location.id, LatLng(newLat, newLng), location.category, location.color, newName)
                 dbHelper.updateLocation(location.id, newLocation)
                 val index = markers.indexOf(location)
@@ -86,7 +86,7 @@ class MarkerListActivity : AppCompatActivity() {
                 adapter.notifyDataSetChanged()
                 dialog.dismiss()
             } else {
-                Toast.makeText(this, "Invalid coordinates", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Invalid coordinates. Latitude must be between -90 and 90, Longitude between -180 and 180", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -98,5 +98,8 @@ class MarkerListActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+    private fun isValidLatLng(lat: Double, lng: Double): Boolean {
+        return lat in -90.0..90.0 && lng in -180.0..180.0
     }
 }

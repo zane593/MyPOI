@@ -1,6 +1,9 @@
 package com.example.mypoi
 
+import CategoryData
 import DatabaseHelper
+import LocationData
+import NearbyPointsManager
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,13 +12,19 @@ import android.graphics.PorterDuff
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -27,6 +36,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -35,13 +45,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var dbHelper: DatabaseHelper
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
     private var isMapInitialized = false
+    private lateinit var nearbyButton: AppCompatButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+
         dbHelper = DatabaseHelper(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+
+        val nearbyButton = findViewById<AppCompatButton>(R.id.nearbyButton)
+        nearbyButton.setOnClickListener {
+            showNearbyPointsDialog()
+        }
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -64,6 +83,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         listButton.setPadding(50, 50, 50, 50)
 
         listButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.list)
+
+
+        val aiButton = findViewById<Button>(R.id.nearbyButton)
+        aiButton.layoutParams.width = 150
+        aiButton.layoutParams.height = 170
+        aiButton.setPadding(50, 50, 50, 50)
+
+        aiButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.sparkles)
 
 
 
@@ -258,5 +285,98 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    //Fa apparire il dialogo per cercare i punti vicini
+
+    private fun showNearbyPointsDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_nearby_points_search, null)
+        val categoryAutoComplete = dialogView.findViewById<AutoCompleteTextView>(R.id.categoryAutoCompleteTextView)
+        val pointAutoComplete = dialogView.findViewById<AutoCompleteTextView>(R.id.pointAutoCompleteTextView)
+        val searchButton = dialogView.findViewById<Button>(R.id.searchButton)
+
+        val categories = dbHelper.getAllCategories()
+        val categoryAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, categories.map { it.name })
+        categoryAutoComplete.setAdapter(categoryAdapter)
+
+        var selectedCategory: CategoryData? = null
+        var selectedPoint: LocationData? = null
+
+        categoryAutoComplete.setOnItemClickListener { _, _, position, _ ->
+            selectedCategory = categories[position]
+            val points = dbHelper.getLocationsByCategory(selectedCategory!!.id)
+            val pointAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, points.map { it.name })
+            pointAutoComplete.setAdapter(pointAdapter)
+            pointAutoComplete.text.clear()
+            selectedPoint = null
+        }
+
+        pointAutoComplete.setOnItemClickListener { _, _, position, _ ->
+            selectedPoint = dbHelper.getLocationsByCategory(selectedCategory!!.id)[position]
+        }
+
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .setTitle("Cerca punti di interesse vicini")
+            .create()
+
+        searchButton.setOnClickListener {
+            if (selectedPoint != null) {
+                dialog.dismiss()
+                searchNearbyPoints(selectedPoint!!)
+            } else {
+                Toast.makeText(this, "Seleziona un punto", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun searchNearbyPoints(point: LocationData) {
+        val loadingDialog = showLoadingDialog()
+
+        val nearbyPointsManager = NearbyPointsManager(
+            this,
+            getString(R.string.perplexity_api_key),
+            getString(R.string.google_api_key),
+            getString(R.string.google_cse_id)
+        )
+
+        lifecycleScope.launch {
+            try {
+                val nearbyPoints = nearbyPointsManager.getNearbyPointsOfInterest(point.latLng.latitude, point.latLng.longitude)
+                loadingDialog.dismiss()
+                showNearbyPointsResultDialog(nearbyPoints)
+            } catch (e: Exception) {
+                loadingDialog.dismiss()
+                Log.e("MainActivity", "Errore nel recupero dei punti di interesse vicini", e)
+                Toast.makeText(this@MainActivity, "Errore nel recupero dei punti vicini: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun showLoadingDialog(): AlertDialog {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_loading, null)
+        return MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+            .apply { show() }
+    }
+
+
+    private fun showNearbyPointsResultDialog(nearbyPoints: List<NearbyPointsManager.PointOfInterest>) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_nearby_points_result, null)
+        val recyclerView = dialogView.findViewById<RecyclerView>(R.id.nearbyPointsRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = NearbyPointsAdapter(nearbyPoints) { point ->
+            Toast.makeText(this, "Selezionato: ${point.namePOI}", Toast.LENGTH_SHORT).show()
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .setTitle("Punti di interesse vicini")
+            .setPositiveButton("Chiudi") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 }
