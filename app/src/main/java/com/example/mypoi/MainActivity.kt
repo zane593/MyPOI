@@ -151,9 +151,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_location, null)
         val categoryAutoCompleteTextView = dialogView.findViewById<AutoCompleteTextView>(R.id.categoryAutoCompleteTextView)
         val newCategoryEditText = dialogView.findViewById<EditText>(R.id.newCategoryEditText)
-        val pointNameEditText = dialogView.findViewById<TextInputEditText>(R.id.pointNameEditText)
+        val pointNameEditText = dialogView.findViewById<EditText>(R.id.pointNameEditText)
         val buttonSave = dialogView.findViewById<Button>(R.id.buttonSave)
         val colorContainer = dialogView.findViewById<View>(R.id.colorContainer)
+        val categoryColorView = dialogView.findViewById<View>(R.id.categoryColorView)
 
         val categories = dbHelper.getAllCategories()
         val categoryNames = listOf("Crea Categoria") + categories.map { it.name }
@@ -195,12 +196,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 newCategoryEditText.isEnabled = true
                 newCategoryEditText.visibility = View.VISIBLE
                 colorContainer.visibility = View.VISIBLE
+                categoryColorView.visibility = View.GONE
             } else {
                 newCategoryEditText.text?.clear()
                 newCategoryEditText.isEnabled = false
                 newCategoryEditText.visibility = View.GONE
                 colorContainer.visibility = View.GONE
-                selectedColor = categories[position - 1].color.toString()
+
+                val selectedCategory = categories[position - 1]
+                selectedColor = selectedCategory.color.toString()
+
+                // Mostra il colore della categoria selezionata
+                categoryColorView.visibility = View.VISIBLE
+                categoryColorView.background = ContextCompat.getDrawable(this, R.drawable.circle_background)?.apply {
+                    setColorFilter(Color.HSVToColor(floatArrayOf(selectedCategory.color, 1f, 1f)), PorterDuff.Mode.SRC_ATOP)
+                }
             }
         }
 

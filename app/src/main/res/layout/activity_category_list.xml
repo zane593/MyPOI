@@ -10,7 +10,11 @@
     <ListView
         android:id="@+id/categoryListView"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@null"
         android:dividerHeight="10dp"
-        android:layout_height="wrap_content" />
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp" />
 
 </LinearLayout>

@@ -165,6 +165,21 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
     }
 
+    fun deleteCategory(categoryId: Long) {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        try {
+            // Elimina tutti i punti associati alla categoria
+            db.delete(TABLE_LOCATIONS, "$COLUMN_CATEGORY_ID = ?", arrayOf(categoryId.toString()))
+            // Elimina la categoria
+            db.delete(TABLE_CATEGORIES, "$COLUMN_ID = ?", arrayOf(categoryId.toString()))
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+        db.close()
+    }
+
     fun updateLocation(id: Long, newLocation: LocationData) {
         val db = this.writableDatabase
         val values = ContentValues().apply {

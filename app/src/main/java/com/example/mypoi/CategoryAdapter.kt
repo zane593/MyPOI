@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
 
 class CategoryAdapter(
     private val context: Context,
@@ -49,15 +50,24 @@ class CategoryAdapter(
 
     private fun showEditCategoryDialog(category: CategoryData, position: Int) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_location, null)
-        val categoryAutoCompleteTextView = dialogView.findViewById<AutoCompleteTextView>(R.id.categoryAutoCompleteTextView)
+
+
+        val categoryInputLayout = dialogView.findViewById<TextInputLayout>(R.id.categoryInputLayout)
         val newCategoryEditText = dialogView.findViewById<EditText>(R.id.newCategoryEditText)
         val colorContainer = dialogView.findViewById<View>(R.id.colorContainer)
         val buttonSave = dialogView.findViewById<Button>(R.id.buttonSave)
+        val buttonDelete = dialogView.findViewById<Button>(R.id.buttonDelete)
+        val pointNameEditText = dialogView.findViewById<EditText>(R.id.pointNameEditText)
 
-        categoryAutoCompleteTextView.visibility = View.GONE
+        categoryInputLayout.visibility = View.GONE
+        newCategoryEditText.visibility = View.VISIBLE
+        colorContainer.visibility = View.VISIBLE
+        buttonSave.visibility = View.VISIBLE
+        buttonDelete.visibility = View.VISIBLE
+        pointNameEditText.visibility = View.GONE
 
         newCategoryEditText.setText(category.name)
-        colorContainer.visibility = View.VISIBLE
+        newCategoryEditText.hint = "Modifica nome"
 
         val colorIds = listOf(R.id.color1, R.id.color2, R.id.color3, R.id.color4, R.id.color5, R.id.color6,
             R.id.color7, R.id.color8, R.id.color9, R.id.color10, R.id.color11, R.id.color12)
@@ -105,6 +115,10 @@ class CategoryAdapter(
             }
         }
 
+        buttonDelete.setOnClickListener {
+            showDeleteConfirmationDialog(category, position)
+        }
+
         dialog.show()
     }
 
@@ -113,5 +127,19 @@ class CategoryAdapter(
         val hsv = FloatArray(3)
         Color.colorToHSV(color, hsv)
         return hsv[0]
+    }
+
+    private fun showDeleteConfirmationDialog(category: CategoryData, position: Int) {
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Elimina categoria")
+            .setMessage("Sei sicuro di voler eliminare la categoria '${category.name}' e tutti i punti associati?")
+            .setPositiveButton("Elimina") { _, _ ->
+                dbHelper.deleteCategory(category.id)
+                categories.removeAt(position)
+                notifyDataSetChanged()
+                Toast.makeText(context, "Categoria eliminata", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Annulla", null)
+            .show()
     }
 }

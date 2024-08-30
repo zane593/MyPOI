@@ -18,7 +18,8 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Latitude">
+        android:hint="Latitude"
+        android:layout_marginTop="16dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etLatitude"
@@ -30,7 +31,8 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Longitude">
+        android:hint="Longitude"
+        android:layout_marginTop="16dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etLongitude"
@@ -42,7 +44,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp">
 
         <Button
             android:id="@+id/btnModify"
@@ -52,12 +55,5 @@
             android:layout_weight="1"
             android:text="Modifica" />
 
-        <Button
-            android:id="@+id/btnDelete"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/medium_blue"
-            android:layout_weight="1"
-            android:text="Elimina" />
     </LinearLayout>
 </LinearLayout>

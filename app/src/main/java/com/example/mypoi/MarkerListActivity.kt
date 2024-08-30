@@ -64,7 +64,6 @@ class MarkerListActivity : AppCompatActivity() {
         val etLatitude = dialogView.findViewById<TextInputEditText>(R.id.etLatitude)
         val etLongitude = dialogView.findViewById<TextInputEditText>(R.id.etLongitude)
         val btnModify = dialogView.findViewById<Button>(R.id.btnModify)
-        val btnDelete = dialogView.findViewById<Button>(R.id.btnDelete)
 
         etPointName.setText(location.name)
         etLatitude.setText(location.latLng.latitude.toString())
@@ -88,13 +87,6 @@ class MarkerListActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Invalid coordinates. Latitude must be between -90 and 90, Longitude between -180 and 180", Toast.LENGTH_LONG).show()
             }
-        }
-
-        btnDelete.setOnClickListener {
-            dbHelper.deleteLocation(location.id)
-            markers.remove(location)
-            adapter.notifyDataSetChanged()
-            dialog.dismiss()
         }
 
         dialog.show()

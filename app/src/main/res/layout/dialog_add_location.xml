@@ -59,6 +59,13 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"/>
 
+    <View
+        android:id="@+id/categoryColorView"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
 
     <com.google.android.flexbox.FlexboxLayout
         android:id="@+id/colorContainer"
@@ -209,5 +216,15 @@
         android:text="Salva"
         android:backgroundTint="@color/medium_blue"
         android:layout_marginTop="16dp"/>
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonDelete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Elimina categoria"
+        android:backgroundTint="@color/medium_blue"
+        android:layout_marginTop="16dp"/>
+
 
 </LinearLayout>
