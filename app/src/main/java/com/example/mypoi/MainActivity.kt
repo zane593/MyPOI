@@ -206,7 +206,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 val selectedCategory = categories[position - 1]
                 selectedColor = selectedCategory.color.toString()
 
-                // Mostra il colore della categoria selezionata
                 categoryColorView.visibility = View.VISIBLE
                 categoryColorView.background = ContextCompat.getDrawable(this, R.drawable.circle_background)?.apply {
                     setColorFilter(Color.HSVToColor(floatArrayOf(selectedCategory.color, 1f, 1f)), PorterDuff.Mode.SRC_ATOP)

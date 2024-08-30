@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
@@ -104,10 +105,8 @@ class CategoryAdapter(
             val newName = newCategoryEditText.text.toString()
             if (newName.isNotEmpty()) {
                 val newColor = selectedColor.toFloatColor()
-                // Aggiorna il database
                 dbHelper.updateCategory(category.id, newName, newColor)
                 dialog.dismiss()
-                // Aggiorna i dati locali e notifica il cambiamento
                 categories[position] = CategoryData(category.id, newName, newColor)
                 notifyDataSetChanged()
             } else {
@@ -116,7 +115,7 @@ class CategoryAdapter(
         }
 
         buttonDelete.setOnClickListener {
-            showDeleteConfirmationDialog(category, position)
+            showDeleteConfirmationDialog(category, position, dialog)
         }
 
         dialog.show()
@@ -129,7 +128,7 @@ class CategoryAdapter(
         return hsv[0]
     }
 
-    private fun showDeleteConfirmationDialog(category: CategoryData, position: Int) {
+    private fun showDeleteConfirmationDialog(category: CategoryData, position: Int, editDialog: AlertDialog) {
         MaterialAlertDialogBuilder(context)
             .setTitle("Elimina categoria")
             .setMessage("Sei sicuro di voler eliminare la categoria '${category.name}' e tutti i punti associati?")
@@ -138,6 +137,7 @@ class CategoryAdapter(
                 categories.removeAt(position)
                 notifyDataSetChanged()
                 Toast.makeText(context, "Categoria eliminata", Toast.LENGTH_SHORT).show()
+                editDialog.dismiss()
             }
             .setNegativeButton("Annulla", null)
             .show()
