@@ -155,6 +155,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val buttonSave = dialogView.findViewById<Button>(R.id.buttonSave)
         val colorContainer = dialogView.findViewById<View>(R.id.colorContainer)
         val categoryColorView = dialogView.findViewById<View>(R.id.categoryColorView)
+        val buttonDelete = dialogView.findViewById<Button>(R.id.buttonDelete)
 
         val categories = dbHelper.getAllCategories()
         val categoryNames = listOf("Crea Categoria") + categories.map { it.name }
@@ -187,6 +188,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 updateColorSelection(it, colors[index])
             }
         }
+
+        buttonDelete.visibility = View.GONE
 
         updateColorSelection(dialogView.findViewById(colorIds[0]), colors[0])
 
